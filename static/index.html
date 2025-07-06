@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penny - Your Penguin Therapist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f8f4ff 0%, #e8d5ff 20%, #d4c5f9 40%, #c8b8f8 60%, #b8a9f7 80%, #a89df6 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-element {
+            position: fixed;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .cloud {
+            width: 80px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 40px;
+            animation: drift 20s linear infinite;
+        }
+
+        .cloud::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+        }
+
+        .cloud::after {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+        }
+
+        .sparkle {
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes drift {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(calc(100vw + 100px)); }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(168, 157, 246, 0.2);
+        }
+
+        .penguin-avatar {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            border-radius: 50%;
+            position: relative;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .penguin-avatar::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 50px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .penguin-eyes {
+            position: absolute;
+            top: 20px;
+            left: 25px;
+            width: 8px;
+            height: 8px;
+            background: black;
+            border-radius: 50%;
+            box-shadow: 15px 0 0 black;
+        }
+
+        .penguin-beak {
+            position: absolute;
+            top: 35px;
+            left: 37px;
+            width: 0;
+            height: 0;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+            border-top: 6px solid #f6ad55;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header h1 {
+            color: #553c9a;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            color: #6b46c1;
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        /* Chat container */
+        .chat-container {
+            display: flex;
+            gap: 20px;
+            height: 600px;
+        }
+
+        .chat-history {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(168, 157, 246, 0.15);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.bot {
+            text-align: left;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+            color: white;
+        }
+
+        .message.bot .message-bubble {
+            background: rgba(255, 255, 255, 0.8);
+            color: #4c1d95;
+            border: 1px solid rgba(168, 157, 246, 0.3);
+        }
+
+        .message-time {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        /* Input area */
+        .input-area {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(168, 157, 246, 0.15);
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .input-field {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid rgba(168, 157, 246, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            color: #4c1d95;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .input-field::placeholder {
+            color: #9ca3af;
+        }
+
+        .send-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .mood-selector {
+            margin-top: 20px;
+        }
+
+        .mood-title {
+            color: #6b46c1;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .mood-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .mood-btn {
+            padding: 8px 16px;
+            border: 2px solid rgba(168, 157, 246, 0.3);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            color: #6b46c1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .mood-btn:hover, .mood-btn.selected {
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .input-area {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background elements -->
+    <div class="cloud bg-element" style="top: 10%; left: -100px; animation-delay: 0s;"></div>
+    <div class="cloud bg-element" style="top: 30%; left: -100px; animation-delay: 7s;"></div>
+    <div class="cloud bg-element" style="top: 60%; left: -100px; animation-delay: 14s;"></div>
+    
+    <div class="sparkle bg-element" style="top: 15%; left: 20%; animation-delay: 0s;"></div>
+    <div class="sparkle bg-element" style="top: 35%; left: 80%; animation-delay: 1s;"></div>
+    <div class="sparkle bg-element" style="top: 55%; left: 30%; animation-delay: 2s;"></div>
+    <div class="sparkle bg-element" style="top: 75%; left: 70%; animation-delay: 1.5s;"></div>
+    <div class="sparkle bg-element" style="top: 25%; left: 50%; animation-delay: 0.5s;"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="penguin-avatar">
+                <div class="penguin-eyes"></div>
+                <div class="penguin-beak"></div>
+            </div>
+            <h1>Penny</h1>
+            <p>Your friendly penguin therapist is here to listen and support you 🐧💜</p>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="chat-container">
+            <div class="chat-history" id="chatHistory">
+                <div class="message bot">
+                    <div class="message-bubble">
+                        Hello! I'm Penny, your penguin therapist. I'm here to provide a safe, judgment-free space where you can share your thoughts and feelings. How are you doing today?
+                    </div>
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea 
+                        class="input-field" 
+                        id="messageInput" 
+                        placeholder="Share what's on your mind... I'm here to listen."
+                    ></textarea>
+                    <button class="send-button" id="sendButton">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="mood-selector">
+                    <div class="mood-title">How are you feeling today?</div>
+                    <div class="mood-buttons">
+                        <div class="mood-btn" data-mood="happy">😊 Happy</div>
+                        <div class="mood-btn" data-mood="sad">😢 Sad</div>
+                        <div class="mood-btn" data-mood="anxious">😰 Anxious</div>
+                        <div class="mood-btn" data-mood="stressed">😤 Stressed</div>
+                        <div class="mood-btn" data-mood="confused">😕 Confused</div>
+                        <div class="mood-btn" data-mood="calm">😌 Calm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatHistory = document.getElementById('chatHistory');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const moodButtons = document.querySelectorAll('.mood-btn');
+
+        let selectedMood = null;
+
+        // Therapeutic responses based on mood and keywords
+        const responses = {
+            happy: [
+                "That's wonderful to hear! It's beautiful when you can recognize and appreciate the good moments. What's bringing you joy today?",
+                "I'm so glad you're feeling happy! These positive feelings are precious. Would you like to talk about what's contributing to this happiness?",
+                "Your happiness is contagious! 🐧 It's important to savor these moments. What would you like to share about your day?"
+            ],
+            sad: [
+                "I hear that you're feeling sad, and that's completely valid. Your feelings matter, and it's okay to not be okay sometimes. Would you like to talk about what's weighing on your heart?",
+                "Thank you for sharing that with me. Sadness can feel heavy, but you don't have to carry it alone. I'm here to listen without judgment.",
+                "It takes courage to acknowledge when we're feeling down. You're not alone in this. What would feel most helpful to talk about right now?"
+            ],
+            anxious: [
+                "Anxiety can feel overwhelming, but you're taking a positive step by reaching out. Let's work through this together. What thoughts are creating the most anxiety for you?",
+                "I understand that anxiety can make everything feel uncertain. You're safe here, and we can take this one step at a time. What's on your mind?",
+                "Anxiety often comes from our mind's way of trying to protect us. You're brave for facing these feelings. What would help you feel more grounded right now?"
+            ],
+            stressed: [
+                "Stress can feel like it's taking over everything. You're doing something important by taking time to check in with yourself. What's creating the most pressure for you right now?",
+                "I can sense that you're carrying a lot right now. Stress affects us all differently. What would feel most supportive to talk through?",
+                "It sounds like you have a lot on your plate. Sometimes just talking through our stressors can help lighten the load. What's weighing on you most?"
+            ],
+            confused: [
+                "Confusion can be uncomfortable, but it's often a sign that we're processing something important. I'm here to help you sort through these thoughts. What's feeling unclear?",
+                "It's okay to feel confused - sometimes our minds need time to make sense of things. What thoughts or situations are creating this confusion for you?",
+                "Confusion can actually be a healthy part of growth and understanding. Let's explore what's creating these unclear feelings together."
+            ],
+            calm: [
+                "It's beautiful that you're feeling calm. These peaceful moments are so valuable. What's helping you feel centered today?",
+                "I'm glad you're experiencing some calm. These moments of peace are important for our wellbeing. What would you like to reflect on?",
+                "Calmness is a gift, especially in our busy world. What's contributing to this sense of peace for you?"
+            ],
+            general: [
+                "Thank you for sharing that with me. Your feelings and experiences are valid and important. What would you like to explore further?",
+                "I'm here to listen and support you. Sometimes just expressing our thoughts can be helpful. What's on your mind today?",
+                "You're taking an important step by reaching out. I'm here to provide a safe space for whatever you'd like to discuss.",
+                "Every feeling you have is valid and worth exploring. What feels most important to talk about right now?",
+                "I appreciate you trusting me with your thoughts. What would feel most helpful to focus on today?"
+            ]
+        };
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div class="message-bubble">${content}</div>
+                <div class="message-time">${timeString}</div>
+            `;
+            
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function generateResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            
+            // Check for crisis keywords
+            const crisisKeywords = ['suicide', 'kill myself', 'end it all', 'not worth living', 'hurt myself'];
+            if (crisisKeywords.some(keyword => lowerMessage.includes(keyword))) {
+                return "I'm really concerned about you and want you to know that you matter. Please reach out to a crisis helpline immediately: National Suicide Prevention Lifeline: 988 or 1-800-273-8255. You don't have to go through this alone. 🐧💜";
+            }
+
+            // Use mood-based responses if a mood is selected
+            if (selectedMood && responses[selectedMood]) {
+                const moodResponses = responses[selectedMood];
+                return moodResponses[Math.floor(Math.random() * moodResponses.length)];
+            }
+
+            // Keyword-based responses
+            if (lowerMessage.includes('anxious') || lowerMessage.includes('anxiety') || lowerMessage.includes('worried')) {
+                return responses.anxious[Math.floor(Math.random() * responses.anxious.length)];
+            } else if (lowerMessage.includes('sad') || lowerMessage.includes('depression') || lowerMessage.includes('down')) {
+                return responses.sad[Math.floor(Math.random() * responses.sad.length)];
+            } else if (lowerMessage.includes('stress') || lowerMessage.includes('overwhelmed') || lowerMessage.includes('pressure')) {
+                return responses.stressed[Math.floor(Math.random() * responses.stressed.length)];
+            } else if (lowerMessage.includes('happy') || lowerMessage.includes('joy') || lowerMessage.includes('excited')) {
+                return responses.happy[Math.floor(Math.random() * responses.happy.length)];
+            } else if (lowerMessage.includes('confused') || lowerMessage.includes('uncertain') || lowerMessage.includes('lost')) {
+                return responses.confused[Math.floor(Math.random() * responses.confused.length)];
+            } else if (lowerMessage.includes('calm') || lowerMessage.includes('peaceful') || lowerMessage.includes('relaxed')) {
+                return responses.calm[Math.floor(Math.random() * responses.calm.length)];
+            }
+
+            // General supportive responses
+            return responses.general[Math.floor(Math.random() * responses.general.length)];
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                messageInput.value = '';
+                
+                // Simulate typing delay
+                setTimeout(() => {
+                    const response = generateResponse(message);
+                    addMessage(response);
+                }, 1000 + Math.random() * 1000);
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        moodButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                moodButtons.forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                selectedMood = button.dataset.mood;
+            });
+        });
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        });
+    </script>
+</body>
+</html>
